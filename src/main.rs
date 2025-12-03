@@ -1,11 +1,22 @@
-fn unique(a: Vec<i32>) -> Vec<i32> {
-    todo!()
-}
+use std::collections::HashSet;
+
+// fn unique(a: Vec<i32>) -> Vec<i32> {
+//     let mut map: HashSet<i32> = HashSet::new();
+//     for num in a {
+//         map.insert(num);
+//     }
+//     map.into_iter().collect()
+// }
 
 // advanced 1: use generic types
-// fn unique(a: Vec<T>) -> Vec<T> {
-//     todo!();
-// }
+fn unique<T>(a: Vec<T>) -> Vec<T> 
+where T: std::hash::Hash + Eq {
+    let mut map: HashSet<T> = HashSet::new();
+    for num in a {
+        map.insert(num);
+    }
+    map.into_iter().collect()
+}
 
 // advanced 2: keep items in order
 // fn unique(a: Iterable<T>) -> Vec<T> {
@@ -25,7 +36,7 @@ fn main() {
 
 #[test]
 fn empty_list() {
-    let input = vec![];
+    let input: Vec<i32> = vec![];
     let expected_output = vec![];
     let actual_output = unique(input);
     assert_eq!(actual_output, expected_output);
