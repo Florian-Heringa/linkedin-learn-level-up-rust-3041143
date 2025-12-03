@@ -5,11 +5,38 @@ struct Isbn {
     digits: Vec<u8>,
 }
 
+#[derive(Debug)]
+enum InvalidIsbn {
+    TooLong,
+    TooShort,
+    FailedChecksum,
+}
+
 impl FromStr for Isbn {
-    type Err = (); // TODO: replace with appropriate type
+    type Err = InvalidIsbn; // TODO: replace with appropriate type
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        todo!();        
+        let digits = s.replace("-", "");
+
+        if digits.len() < 13 {
+            return Err(InvalidIsbn::TooShort);
+        } else if digits.len() > 13 {
+            return Err(InvalidIsbn::TooLong);
+        }
+
+        let digits: Vec<u8> = digits
+            .chars()
+            .map(|c| c.to_digit(10).unwrap() as u8)
+            .collect();
+
+        if calculate_check_digit(&digits[0..12]) == *digits.last().unwrap() {
+            Ok(Isbn {
+                raw: s.to_string(),
+                digits,
+            })
+        } else {
+            Err(InvalidIsbn::FailedChecksum)
+        }
     }
 }
 
@@ -21,7 +48,13 @@ impl std::fmt::Display for Isbn {
 
 // https://en.wikipedia.org/wiki/International_Standard_Book_Number#ISBN-13_check_digit_calculation
 fn calculate_check_digit(digits: &[u8]) -> u8 {
-    todo!()
+    let check_digit: u32 = digits
+        .iter()
+        .zip(&[1, 3].repeat(6))
+        .map(|(d, c)| d * c)
+        .map(|x| x as u32)
+        .sum();
+    (10 - (check_digit % 10) as u8) % 10
 }
 
 fn main() {
