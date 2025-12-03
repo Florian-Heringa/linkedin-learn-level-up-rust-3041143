@@ -1,5 +1,8 @@
 fn sum_with_missing(numbers: Vec<Option<i32>>) -> i32 {
-    todo!();
+    numbers.iter().fold(
+        0, 
+        |mut acc, val| { acc += val.unwrap_or(0); acc }
+    )
 }
 
 fn main() {
