@@ -1,4 +1,5 @@
-use std::path;
+use std::{fs, path};
+use std::fs::File;
 
 trait FileMetadata {
     fn exists(&self) -> bool;
@@ -10,15 +11,16 @@ trait FileMetadata {
 
 impl FileMetadata for path::Path {
     fn is_readable(&self) -> bool {
-        todo!();
+        File::open(self).is_ok()
     }
 
     fn is_writeable(&self) -> bool {
-        todo!();
+        //!File::open(self).unwrap().metadata().unwrap().permissions().readonly()
+        !fs::metadata(self).is_ok_and(|m| m.permissions().readonly())
     }
 
     fn exists(&self) -> bool {
-        todo!();
+        self.exists()
     }
 }
 
