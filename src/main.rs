@@ -1,36 +1,48 @@
 mod vigenere {
-    pub fn encrypt(plaintext: &str, key: &str) -> String {       
-        // Only works for input strings with uppercase characters only 
-        let shifts: Vec<u8> = key.chars().map(|c| c as u8 - b'A').collect();
-        let mut encoded = String::with_capacity(plaintext.len());
-        let mut key_idx = 0;
-        for c in plaintext.chars() {
+    use regex::Regex;
 
-            let new_char = if c.is_ascii_alphabetic() {
-                // Convert to number in range 0..25 
-                let char_as_num = c as u8 - b'A';
-                // Shift by key amount, keeping in alphabet range
-                let shifted = (char_as_num + shifts[key_idx % shifts.len()]) % 26;
-                key_idx += 1;
-                // Convert back to character
-                (shifted + b'A') as char
-            } else {
-                c
-            };
+    fn to_alphabet_index(c: u8) -> u8 {
+        c - b'A'
+    }
 
-            encoded.push(new_char);
-        };
+    fn vigenere_step((key, plain): (u8, u8)) -> u8 {
+        (key + plain) % 26
+    }
 
-        encoded
+    fn to_character(c: u8) -> char {
+        (c + b'A') as char
+    }
+
+    pub fn encrypt(plaintext: &str, key: &str) -> String {
+        // Clean input, remove all whitespace characters
+        let plaintext = Regex::new(r"\s+")
+            .unwrap()
+            .replace_all(plaintext, "")
+            .to_string();
+
+        // Zip cycled key iterator with plaintext and encode while moving through
+        key
+            .bytes()
+            .map(to_alphabet_index)
+            .cycle()
+            .zip(
+                plaintext
+                    .bytes()
+                    .map(to_alphabet_index)
+                )
+            .map(vigenere_step)
+            .map(to_character)
+            .collect()
     }
 
     pub fn decrypt(ciphertext: &str, key: &str) -> String {
         // Decrypting is the same as encrypting with the inverse of the key
         // The inverse can be found by taking (26 - key[i])
         // So 'A' -> 'Z', 'B' -> 'Y',
-        let key: String = key.chars().map(|c| {
-            ((26 - (c as u8 - b'A')) + b'A') as char
-        }).collect();
+        let key: String = key
+            .chars()
+            .map(|c| ((26 - (c as u8 - b'A')) + b'A') as char)
+            .collect();
         encrypt(ciphertext, &key)
     }
 }
