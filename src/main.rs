@@ -29,7 +29,7 @@ impl Graph {
         }
     }
 }
-
+``
 fn shortest_path(g: &Graph, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)> {
 
     let n_nodes = g.nodes.len();
